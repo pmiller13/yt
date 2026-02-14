@@ -13,19 +13,22 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
         'addmetadata': True,
         'postprocessors': [
             {'key': 'FFmpegMetadata', 'add_chapters': True, 'add_metadata': True},
-            {'key': 'EmbedThumbnail'}, 
+            {'key': 'EmbedThumbnail'},
             {'key': 'FFmpegEmbedSubtitle'},
             # SponsorBlock
             {'key': 'SponsorBlock', 'api': 'https://sponsor.ajay.app', 'when': 'after_filter', 'categories': ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro']},
             {'key': 'ModifyChapters', 'remove_sponsor_segments': ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro']}
         ],
         'writesubtitles': True,
-        'subtitleslangs': ['all'], 
+        'subtitleslangs': ['all'],
         'remote_components': ['ejs:github'],
         'sponsorblock_remove': ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro'],
         'merge_output_format': 'mkv',
         'ignoreerrors': True,
-        'verbose': True
+        'verbose': True,
+        'js_runtimes': {
+            'deno': {'path': '/root/.deno/bin/deno'}
+        }
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
