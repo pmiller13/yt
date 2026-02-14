@@ -7,7 +7,8 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
         'format': 'bv*+ba/b',
         'format_sort': ['res:2160', 'fps', 'asr'],
         'outtmpl': f'{download_dir}/%(upload_date)s-%(title)s-%(id)s.%(ext)s',
-        'restrictfilenames': False,
+        # Restrict filenames to ASCII characters, avoiding spaces and special chars
+        'restrictfilenames': True,
         'writedescription': True,
         'writeinfojson': True,
         'addmetadata': True,
@@ -27,9 +28,13 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
         'ignoreerrors': True,
         'verbose': True,
         'js_runtimes': {
-            'deno': {'path': '/root/.deno/bin/deno'}
+            'deno': {'path': 'deno'}  # Use 'deno' from PATH
         }
     }
+
+    # Ensure URL doesn't start with a dash to prevent option injection
+    if url.startswith('-'):
+        raise ValueError("URL cannot start with a dash")
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)

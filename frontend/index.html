@@ -97,7 +97,21 @@
         const status = document.getElementById("status");
         const url = urlInput.value.trim(); // FIXED: .trim() removes mobile whitespace
 
-        if (!url) return;
+        if (!url) {
+            status.textContent = "❌ Please enter a URL";
+            return;
+        }
+
+        // Basic client-side validation
+        try {
+            const parsedUrl = new URL(url);
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                throw new Error("URL must start with http:// or https://");
+            }
+        } catch (e) {
+            status.textContent = "❌ Invalid URL format";
+            return;
+        }
 
         status.textContent = "🚀 Sending request...";
 
@@ -115,16 +129,19 @@
 
             if (!res.ok) {
               // Handle JSON error from server (e.g. { error: "Invalid URL" })
-              throw new Error(data.message || data.error || "Server Error");
+              // Show sanitized message
+              const msg = data.message || data.detail || "Server Error";
+              status.textContent = "❌ Error: " + msg;
+              return;
             }
 
             status.textContent =
-              "✅ " + data.message + " (Check back in a few minutes)";
+              "✅ " + (data.message || "Started") + " (Check back in a few minutes)";
             refreshFiles();
           } else {
             // Handle non-JSON response (The "Position 4" fix)
             const text = await res.text();
-            throw new Error(`Server returned non-JSON error: ${text}`);
+            throw new Error(`Server returned non-JSON error`);
           }
         } catch (e) {
           console.error(e);
@@ -139,18 +156,25 @@
         const list = document.getElementById("fileList");
         list.innerHTML = "<h3>Recent Downloads</h3>";
 
-        data.files.forEach((file) => {
-          const div = document.createElement("div");
-          div.className = "file-item";
+        if (data.files && Array.isArray(data.files)) {
+            data.files.forEach((file) => {
+            const div = document.createElement("div");
+            div.className = "file-item";
 
-          // UPDATED: Pointing to the API endpoint
-          // We use encodeURIComponent to handle spaces or special chars in filenames
-          div.innerHTML = `
-                    <span>${file}</span>
-                    <a href="/yt/api/download/${encodeURIComponent(file)}" download>Save</a>
-                `;
-          list.appendChild(div);
-        });
+            // Create elements safely to avoid XSS
+            const span = document.createElement("span");
+            span.textContent = file;
+
+            const a = document.createElement("a");
+            a.href = `/yt/api/download/${encodeURIComponent(file)}`;
+            a.download = "";
+            a.textContent = "Save";
+
+            div.appendChild(span);
+            div.appendChild(a);
+            list.appendChild(div);
+            });
+        }
       }
 
       // Poll for new files every 5 seconds
