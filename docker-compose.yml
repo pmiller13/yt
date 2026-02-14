@@ -7,13 +7,13 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: nginx:alpine
+    build: ./frontend
     container_name: scrubber-frontend
     volumes:
       - ./frontend/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/index.html:/usr/share/nginx/html/index.html:ro
     ports:
-      - "8081:80"
+      - "8081:8080"
     depends_on:
       - backend
 
