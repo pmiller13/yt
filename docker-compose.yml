@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: ./backend
+    container_name: scrubber-backend
+    volumes:
+      - downloads_data:/downloads
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    container_name: scrubber-frontend
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/index.html:/usr/share/nginx/html/index.html:ro
+      # Frontend needs access to the volume to serve the files
+      - downloads_data:/downloads:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  downloads_data:
