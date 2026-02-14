@@ -8,13 +8,13 @@ app = FastAPI()
 class VideoRequest(BaseModel):
     url: str
 
-@app.post("/api/scrub")
+@app.post("api/scrub")
 async def start_scrub(request: VideoRequest, background_tasks: BackgroundTasks):
     # We run this in the background so the UI doesn't freeze
     background_tasks.add_task(run_scrubber, request.url)
     return {"status": "started", "message": f"Scrubbing {request.url}"}
 
-@app.get("/api/files")
+@app.get("api/files")
 def list_files():
     # Simple endpoint to show what's in the folder
     files = sorted(os.listdir("/downloads"), key=lambda x: os.path.getmtime(os.path.join("/downloads", x)), reverse=True)

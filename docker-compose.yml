@@ -15,7 +15,7 @@ services:
       # Frontend needs access to the volume to serve the files
       - downloads_data:/downloads:ro
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - backend
 
