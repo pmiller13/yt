@@ -12,6 +12,7 @@ services:
     volumes:
       - ./frontend/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/index.html:/usr/share/nginx/html/index.html:ro
+      - downloads_data:/downloads:ro
     ports:
       - "8081:8080"
     depends_on:

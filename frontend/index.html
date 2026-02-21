@@ -116,13 +116,12 @@
         status.textContent = "🚀 Sending request...";
 
         try {
-          const res = await fetch("/yt/api/scrub", {
+          const res = await fetch("api/scrub", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url }),
           });
 
-          // FIXED: Check if the response is actually JSON before parsing
           const contentType = res.headers.get("content-type");
           if (contentType && contentType.indexOf("application/json") !== -1) {
             const data = await res.json();
@@ -139,7 +138,6 @@
               "✅ " + (data.message || "Started") + " (Check back in a few minutes)";
             refreshFiles();
           } else {
-            // Handle non-JSON response (The "Position 4" fix)
             const text = await res.text();
             throw new Error(`Server returned non-JSON error`);
           }
@@ -150,8 +148,7 @@
       }
 
       async function refreshFiles() {
-        // Note: Keeping your existing path prefix /yt/ based on your code
-        const res = await fetch("/yt/api/files");
+        const res = await fetch("api/files");
         const data = await res.json();
         const list = document.getElementById("fileList");
         list.innerHTML = "<h3>Recent Downloads</h3>";
@@ -166,7 +163,7 @@
             span.textContent = file;
 
             const a = document.createElement("a");
-            a.href = `/yt/api/download/${encodeURIComponent(file)}`;
+            a.href = `api/download/${encodeURIComponent(file)}`;
             a.download = "";
             a.textContent = "Save";
 

@@ -1,9 +1,10 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from pydantic import BaseModel, validator
 from scrubber import run_scrubber
 import os
 import re
+import urllib.parse
 
 app = FastAPI()
 
@@ -37,15 +38,16 @@ def list_files():
     files = sorted(os.listdir(DOWNLOADS_DIR), key=lambda x: os.path.getmtime(os.path.join(DOWNLOADS_DIR, x)), reverse=True)
     return {"files": [f for f in files if f.endswith(('.mkv', '.mp4', '.webm'))]}
 
+
+
 @app.get("/api/download/{filename}")
 async def download_file(filename: str):
-    # Sanitize filename to prevent directory traversal attacks (e.g. ../../etc/passwd)
+    # (Keep your existing path traversal security checks)
     if os.path.sep in filename or (os.path.altsep and os.path.altsep in filename):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     safe_filename = os.path.basename(filename)
 
-    # Double check to ensure basename didn't change anything (meaning it was already safe)
     if safe_filename != filename:
          raise HTTPException(status_code=400, detail="Invalid filename traversal attempt")
 
@@ -54,8 +56,15 @@ async def download_file(filename: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
 
-    return FileResponse(
-        path=file_path,
-        filename=safe_filename,
-        media_type='application/octet-stream'
-    )
+    # Encode the filename to handle spaces or special characters in the header
+    encoded_filename = urllib.parse.quote(safe_filename)
+
+    # Tell Nginx to take over the download
+    headers = {
+        "X-Accel-Redirect": f"/protected-downloads/{safe_filename}",
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
+    }
+
+    # Return an empty body. Nginx will replace it with the actual file!
+    return Response(headers=headers)
