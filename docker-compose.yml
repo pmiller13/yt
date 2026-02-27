@@ -5,7 +5,7 @@ services:
     volumes:
       - downloads_data:/downloads
     restart: unless-stopped
-
+    hostname: "backend"
   frontend:
     build: ./frontend
     container_name: scrubber-frontend
@@ -17,6 +17,7 @@ services:
       - "8081:8080"
     depends_on:
       - backend
+    hostname: "frontend"
 
 volumes:
   downloads_data:
