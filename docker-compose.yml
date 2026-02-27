@@ -19,5 +19,23 @@ services:
       - backend
     hostname: "frontend"
 
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: scrubber-tailscale
+    cap_add:
+      - net_admin
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_SERVE_CONFIG=/config/serve-config.json
+      - TS_HOSTNAME=yt
+    volumes:
+      - ${PWD}/config:/config:ro
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+    depends_on:
+      - frontend
 volumes:
   downloads_data:
