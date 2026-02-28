@@ -31,7 +31,7 @@ services:
       - TS_SERVE_CONFIG=/config/serve-config.json
       - TS_HOSTNAME=yt
     volumes:
-      - ${PWD}/config:/config:ro
+      - ./config:/config:ro
     devices:
       - /dev/net/tun:/dev/net/tun
     restart: unless-stopped
