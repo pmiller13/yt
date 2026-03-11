@@ -1,13 +1,14 @@
 import yt_dlp
 
-
 def run_scrubber(url: str, download_dir: str = "/downloads"):
-    # Ensure options match your specific needs
     ydl_opts = {
-        "format": "bv*+ba/b",
-        "format_sort": ["res:2160", "fps", "asr"],
+        # Select best video up to 480p + the absolute best audio stream available
+        "format": "bv*[height<=480]+ba/b[height<=480]/b",
+
+        # Prioritize average audio bitrate (abr) and audio sample rate (asr)
+        "format_sort": ["abr", "asr", "res:480", "fps"],
+
         "outtmpl": f"{download_dir}/%(upload_date)s-%(title)s-%(id)s.%(ext)s",
-        # Restrict filenames to ASCII characters, avoiding spaces and special chars
         "restrictfilenames": True,
         "writedescription": True,
         "writeinfojson": True,
@@ -47,14 +48,12 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
         "merge_output_format": "mkv",
         "ignoreerrors": True,
         "verbose": True,
-        "js_runtimes": {"deno": {"path": "deno"}},  # Use 'deno' from PATH
+        "js_runtimes": {"deno": {"path": "deno"}},
     }
 
-    # Ensure URL doesn't start with a dash to prevent option injection
     if url.startswith("-"):
         raise ValueError("URL cannot start with a dash")
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        # Return the filename so the frontend knows what to look for
         return ydl.prepare_filename(info)
