@@ -69,7 +69,8 @@ async def download_file(filename: str):
 
     # Tell Nginx to take over the download
     headers = {
-        "X-Accel-Redirect": f"/protected-downloads/{safe_filename}",
+        # FIX: Ensure the internal Nginx redirect path is fully URL-encoded
+        "X-Accel-Redirect": f"/protected-downloads/{encoded_filename}",
         "Content-Type": "application/octet-stream",
         "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}",
     }
