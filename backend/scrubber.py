@@ -45,7 +45,7 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
             "intro",
             "outro",
         ],
-        "merge_output_format": "mkv",
+        "merge_output_format": "mp4",
         "ignoreerrors": True,
         "verbose": True,
         "js_runtimes": {"deno": {"path": "deno"}},

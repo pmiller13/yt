@@ -6,6 +6,7 @@ services:
       - downloads_data:/downloads
     restart: unless-stopped
     hostname: "backend"
+
   frontend:
     build: ./frontend
     container_name: scrubber-frontend
@@ -37,5 +38,6 @@ services:
     restart: unless-stopped
     depends_on:
       - frontend
+
 volumes:
   downloads_data:
