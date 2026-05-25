@@ -33,11 +33,25 @@ services:
       - TS_HOSTNAME=yt
     volumes:
       - ./config:/config:ro
+      - tailscale_data:/var/lib/tailscale
     devices:
       - /dev/net/tun:/dev/net/tun
     restart: unless-stopped
     depends_on:
       - frontend
 
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: scrubber-dozzle
+    environment:
+      - DOZZLE_BASE=/logs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8888:8080"
+    restart: unless-stopped
+    hostname: "dozzle"
+
 volumes:
   downloads_data:
+  tailscale_data:
