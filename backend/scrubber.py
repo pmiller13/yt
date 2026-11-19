@@ -2,11 +2,17 @@ import yt_dlp
 
 def run_scrubber(url: str, download_dir: str = "/downloads"):
     ydl_opts = {
-        # Select best video up to 480p + the absolute best audio stream available
-        "format": "bv*[height<=480]+ba/b[height<=480]/b",
+        # English audio only: best video-only stream up to 480p + best English track.
+        # "language^=?en" = tagged English, or untagged (sites/uploads with no language
+        # info). Dubs are always tagged, so a video whose tracks are all tagged as
+        # other languages fails rather than downloading one. "bv" (not "bv*"): if the
+        # video pick had its own audio, yt-dlp would keep it and drop the English track.
+        "format": "bv[height<=480]+ba[language^=?en]/b[height<=480][language^=?en]/b[language^=?en]",
 
-        # Prioritize average audio bitrate (abr) and audio sample rate (asr)
-        "format_sort": ["abr", "asr", "res:480", "fps"],
+        # Prefer the original English track over English dubs/audio description (lang),
+        # then the highest average audio bitrate (abr) and sample rate (asr). "lang"
+        # must precede "abr": custom sort keys outrank yt-dlp's built-in ones.
+        "format_sort": ["lang", "abr", "asr", "res:480", "fps"],
 
         "outtmpl": f"{download_dir}/%(upload_date)s-%(title)s-%(id)s.%(ext)s",
         "restrictfilenames": True,
@@ -56,4 +62,6 @@ def run_scrubber(url: str, download_dir: str = "/downloads"):
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
+        if info is None:  # failed (e.g. no English audio track); yt-dlp already logged why
+            return None
         return ydl.prepare_filename(info)
